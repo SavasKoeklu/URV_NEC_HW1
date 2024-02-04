@@ -41,18 +41,16 @@ class MyNeuralNetwork:
         # array is L x numberof neurons in L x number of neurons of L-1
         for lay in range(1, self.L):
             # I eperienced that the proper weight intialisisation is key to that different activations functions can also be used
-            if(activation_function_name in ['relu','lrelu']):   
+            if(activation_function_name in ['relu']):   
                 # the problem with the relu activation function was the problem of dead Relu, since relu learns only when the field for the last variable is postitive
-                # When negative or 0 fileds the relu derivation mapps calculated gradients to 0, so the network can no adjust it's parameter
+                # When negative or 0 fileds the relu derivation mapps calculated gradients to 0, so the network can no adjust it's parameter, but this can also while training
                 self.w.append(np.random.rand(layers[lay], layers[lay - 1]) * np.sqrt(2 / self.n[lay - 1]))
             
-            elif activation_function_name in ['sigmoid','tanh']:
+            elif activation_function_name in ['sigmoid','tanh','linear','lrelu']:
                 # Initialize weights with Xavier initialization
                 # calculate the range for the weights
                 lower, upper = -(1.0 / np.sqrt(self.n[lay - 1])), (1.0 / np.sqrt(self.n[lay - 1]))
                 self.w.append(np.random.uniform(lower, upper, (layers[lay], layers[lay - 1])))
-            else:
-                self.w.append(np.random.randn(layers[lay], layers[lay - 1]))
 
 
         self.theta = []  # values for thresholds
@@ -123,6 +121,11 @@ class MyNeuralNetwork:
 
     def backpropagation(self, y):
         # calculating deltas for last layer, BP document formula 11
+
+        # experiment with regularization
+        # sum_weights = sum([np.sum(np.abs(np.array(layers_weights))) for layers_weights in self.w])
+        # Ec = sum_weights * 0.00000001
+
         last_layer_index = self.L - 1
         self.delta[last_layer_index] = (
                 self.activation_derivative(self.h[last_layer_index]) * (self.xi[last_layer_index] - y)).T
@@ -187,8 +190,8 @@ if __name__ == '__main__':
     #my_network = MyNeuralNetwork([4, 5, 3, 1], 10, 0.01, 0.9, "relu", 0.2)
     # my_network.fit(turbine[:, :-1], turbine[:, [-1]])
 
-    layers = [4, 5, 1]
-    nn = MyNeuralNetwork(layers, 50, 0.01, 0.8, 'lrelu', 0.1)
+    layers = [4, 8, 32,100, 1]
+    nn = MyNeuralNetwork(layers, 30, 0.1, 0.8, 'lrelu', 0.1)
     #
     print("L = ", nn.L, end="\n")
     print("n = ", nn.n, end="\n")
